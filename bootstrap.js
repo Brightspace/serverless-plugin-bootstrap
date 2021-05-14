@@ -10,6 +10,10 @@ module.exports = class BootstrapPlugin {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
+    // HACK  Work around the unbelievable bug in serverless that will overwrite any value with
+    // its default value if that value is exactly the boolean: true
+    // Record the real options values here...
+    this.virginOptions = _.cloneDeep(options);
     this.provider = serverless.getProvider('aws');
     this.commands = {
       bootstrap: {
@@ -40,6 +44,11 @@ module.exports = class BootstrapPlugin {
   }
 
   bootstrap() {
+    // HACK  Work around the unbelievable bug in serverless that will overwrite any value with
+    // its default value if that value is exactly the boolean: true...
+    // Reassign our real values, which should be okay given that they're real...
+    Object.assign(this.options, this.virginOptions);
+
     const custom = this.serverless.service.custom || {};
 
     this.config = custom.bootstrap || {};
